@@ -59,6 +59,10 @@ class Russound:
         """
         send_msg = self.create_send_message("F0 @cc 00 7F 00 00 @kk 05 02 02 00 00 F1 21 00 @pr 00 @zz 00 01",
                                             controller, zone, volume // 2)
+
+        self.send_data(send_msg)
+        self.get_response_message()  # Clear response buffer
+        """
         try:
             self.lock.acquire()
             #_LOGGER.debug('Zone %s - acquired lock for ', zone)
@@ -69,6 +73,7 @@ class Russound:
             self.lock.release()
             #_LOGGER.debug("Zone %s - released lock for ", zone)
             #_LOGGER.debug("End - controller %s, zone %s, volume set to %s.\n", controller, zone, volume)
+        """
 
     def set_source(self, controller, zone, source):
         """ Set source for a zone - 0 based value for source """
@@ -76,6 +81,10 @@ class Russound:
         _LOGGER.info("Begin - controller= %s, zone= %s change source to %s.", controller, zone, source)
         send_msg = self.create_send_message("F0 @cc 00 7F 00 @zz @kk 05 02 00 00 00 F1 3E 00 00 00 @pr 00 01",
                                             controller, zone, source)
+
+        self.send_data(send_msg)
+        self.get_response_message()  # Clear response buffer
+        """
         try:
             self.lock.acquire()
             _LOGGER.debug('Zone %s - acquired lock for ', zone)
@@ -87,6 +96,7 @@ class Russound:
             self.lock.release()
             _LOGGER.debug("Zone %s - released lock for ", zone)
             _LOGGER.debug("End - controller= %s, zone= %s source set to %s.\n", controller, zone, source)
+        """
 
     def all_on_off(self, power):
         """ Turn all zones on or off
@@ -123,7 +133,7 @@ class Russound:
         resp_msg_signature = self.create_response_signature("04 02 00 @zz 07", zone)
         send_msg = self.create_send_message("F0 @cc 00 7F 00 00 @kk 01 04 02 00 @zz 07 00 00", controller, zone)
         try:
-            self.lock.acquire()
+            #self.lock.acquire()
             #_LOGGER.debug('Acquired lock for zone %s', zone)
             self.send_data(send_msg)
             #_LOGGER.debug("Zone: %s Sent: %s", zone, send_msg)
@@ -141,7 +151,7 @@ class Russound:
                 return_value = None
                 #_LOGGER.warning("Did not receive expected Russound power state for controller %s and zone %s.", controller, zone)
         finally:
-            self.lock.release()
+            #self.lock.release()
             #_LOGGER.debug("Released lock for zone %s", zone)
             #_LOGGER.debug("End - controller= %s, zone= %s, get status \n", controller, zone)
             return return_value

@@ -16,9 +16,10 @@ CONTROLLER_COUNT=2  #how many Russound controllers are daisy chained. Russound a
 #Zone names in order (control 1 then 2, ...)
 ZONE_NAMES = ['Guest Bath', 'Dining Room', 'Kitchen', 'Master Bed', 'Master Bath', 'Nick', 'Office', 'Play Room', 'Alex', 'Living Room', 'Patio', 'Pool']
 SOURCE_NAMES = ['Sonos', 'Apple']   #Source names in order. Russound allows max of 6
-global current_cmd
-global current_zone
-global new_volume
+
+current_cmd = ""
+current_zone = ""
+new_volume = 0
 
 SERIAL_PORT = '/dev/ttyUSB0'       # for RPi
 BAUD = 19200
@@ -276,7 +277,7 @@ class MyServer(BaseHTTPRequestHandler):
         if payload_cmd == "Go":
             current_cmd = payload_cmd
             current_zone = payload_zone
-            new_vollume = x.get_volume(controller_ID(current_zone), zone_ID(current_zone))
+            new_volume = x.get_volume(controller_ID(current_zone), zone_ID(current_zone))
             self._redirect('/go')  # Redirect to zone details page
 
         if payload_cmd == "On":
