@@ -77,6 +77,11 @@ class MyServer(BaseHTTPRequestHandler):
 
     def do_GET(self):
         #Serve the main html page
+
+        global current_cmd
+        global current_zone
+        global new_volume
+        
         if (self.path == '/'):
             html = '''
                 <!DOCTYPE html>
@@ -311,6 +316,8 @@ class MyServer(BaseHTTPRequestHandler):
             new_volume = current_volume + 5
             if (new_volume > 50):
                 new_volume = 50 #cap to max level acceptaed by stystem (50 is = 100%)
+            print (current_cmd)
+            print (current_zone)
             x.set_volume(controller_ID(current_zone), zone_ID(current_zone), new_volume)
             self._redirect('/go')  # Redirect back same page
 
