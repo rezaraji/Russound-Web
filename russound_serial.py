@@ -224,7 +224,7 @@ class Russound:
     def get_response_message(self, resp_msg_signature=None, delay=COMMAND_DELAY):
         """ Receive data from connected gateway and if required seach and return a stream that starts at the required
         response message signature.  The reason we couple the search for the response signature here is that given the
-        RNET protocol and TCP comms, we dont have an easy way of k knowing hat we have received the response.  We want to
+        RNET protocol and TCP comms, we don't have an easy way of knowing that we have received the response.  We want to
         minimise the time spent reading the socket (to reduce user lag), hence we use the message response signature
         at this point to determine when to stop reading."""
 
@@ -232,13 +232,13 @@ class Russound:
         if resp_msg_signature is None:
             no_of_socket_reads = 1  # If we are not looking for a specific response do a single read to clear the buffer
         else:
-            no_of_socket_reads = 10 # Try 10x (= approx 1s at default)if we are looking for a specific response
+            no_of_socket_reads = 20 # Try 20x (= approx 2s at default)if we are looking for a specific response
 
         time.sleep(delay)  # Insert recommended delay to ensure command is processed correctly
 
         data = B''
         for i in range(0, no_of_socket_reads):
-            data += self.ser.read(256)
+            data += self.ser.read(512)
             if resp_msg_signature is not None:  # If we are looking for a specific response
                 matching_message, data = self.find_signature(data, resp_msg_signature)
             if matching_message is not None:  # Required response found

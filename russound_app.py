@@ -81,7 +81,7 @@ class MyServer(BaseHTTPRequestHandler):
         global current_cmd
         global current_zone
         global new_volume
-        
+
         if (self.path == '/'):
             html = '''
                 <!DOCTYPE html>
@@ -279,7 +279,7 @@ class MyServer(BaseHTTPRequestHandler):
         payload_zone = payload.split("%2C+")[1] #Zone #
         payload_zone = payload_zone.replace("+", " ")   #replace any spaces that were converted to "+" via the HTML Post
 
-        if payload_cmd == "Go":
+        if payload_cmd == "Go":     #set the cmd, zone and initial volume for the specific zone page we're in now
             current_cmd = payload_cmd
             current_zone = payload_zone
             new_volume = x.get_volume(controller_ID(current_zone), zone_ID(current_zone))
@@ -313,20 +313,23 @@ class MyServer(BaseHTTPRequestHandler):
 
         if payload_cmd == "Up":
             current_volume = x.get_volume(controller_ID(current_zone), zone_ID(current_zone))
-            new_volume = current_volume + 5
-            if (new_volume > 50):
-                new_volume = 50 #cap to max level acceptaed by stystem (50 is = 100%)
-            print (current_cmd)
-            print (current_zone)
-            x.set_volume(controller_ID(current_zone), zone_ID(current_zone), new_volume)
+            #print(current_cmd)
+            #print(current_zone)
+            #print(current_volume)
+            if current_volume is not None:
+                new_volume = current_volume + 5
+                if (new_volume > 100):
+                    new_volume = 100 #cap to max level acceptaed by system
+                x.set_volume(controller_ID(current_zone), zone_ID(current_zone), new_volume)
             self._redirect('/go')  # Redirect back same page
 
         if payload_cmd == "Down":
             current_volume = x.get_volume(controller_ID(current_zone), zone_ID(current_zone))
-            new_volume = current_volume - 5
-            if (new_volume < 0):
-                new_volume = 0 #cap to min level acceptaed by stystem
-            x.set_volume(controller_ID(current_zone), zone_ID(current_zone), new_volume)
+            if current_volume is not None:
+                new_volume = current_volume - 5
+                if (new_volume < 0):
+                    new_volume = 0 #Floor to min level acceptaed by system
+                x.set_volume(controller_ID(current_zone), zone_ID(current_zone), new_volume)
             self._redirect('/go')  # Redirect back same page
 
 
