@@ -218,7 +218,7 @@ class MyServer(BaseHTTPRequestHandler):
                   text-align: center;
                   text-decoration: none;
                   display: inline-block;
-                  font-size: 35px;
+                  font-size: 40px;
                   margin: 2px;
                   cursor: pointer;
                   white-space: nowrap;
@@ -227,34 +227,63 @@ class MyServer(BaseHTTPRequestHandler):
                 .buttonOn {{background-color: #4CAF50;}} /* Green */
                 .buttonOff {{background-color: #DC143C;}} /* Red */
                 .buttonAllOff {{width: 90%; background-color: #DC143C;}}
-                .buttonGo {{width: 75%; background-color: #6593ff;}}
+                .buttonBack {{width: 80%; background-color: #6593ff;}}
+                .buttonVol {{background-color: #FF7D23;}} /* Orange */
                 </style>
 
                <body>
                   <center>
                   <h1>{zonetitle}</h1>
                   <form method="post" action="/post">
+                  
                     <table style="width:80%">
                     <tr>
-                    <td><h2>Zone</h2>
+                    <td><h2>Zone</h2></td>
                     <td><button class="button buttonOn" type="submit" value="On, zone" name="button">ON</button></td>
                     <td><button class="button buttonOff" type="submit" value="Off, zone" name="button">OFF</button></td>
                     </tr>
                     <tr>
-                    <td><h2>Source</h2>
+                    <td><h2>Source</h2></td>
                     <td><button class="button buttonOn" type="submit" value="Source, Sonos" name="button">Sonos</button></td>
                     <td><button class="button buttonOff" type="submit" value="Source, Apple" name="button">Apple</button></td>
                     </tr>
+                    
                     <tr>
-                    <td><h2>Volume</h2>
-                    <td><button class="button buttonOn" type="submit" value="Up, zone" name="button">UP</button></td>
-                    <td><button class="button buttonOff" type="submit" value="Down, zone" name="button">DOWN</button></td>
+                    <td><h2>Volume</h2></td>
+                    <td><button class="button buttonVol" type="submit" value="vol10, none" name="button">10%</button></td>
+                    <td><button class="button buttonVol" type="submit" value="vol20, none" name="button">20%</button></td>
                     </tr>
-                
+                    <tr>
+                    <td><button class="button buttonVol" type="submit" value="vol25, none" name="button">25%</button></td>
+                    <td><button class="button buttonVol" type="submit" value="vol30, none" name="button">30%</button></td>
+                    <td><button class="button buttonVol" type="submit" value="vol35, none" name="button">35%</button></td>
+                    </tr>
+                    <tr>
+                    <td><button class="button buttonVol" type="submit" value="vol40, none" name="button">40%</button></td>
+                    <td><button class="button buttonVol" type="submit" value="vol45, none" name="button">45%</button></td>
+                    <td><button class="button buttonVol" type="submit" value="vol50, none" name="button">50%</button></td>
+                    </tr>
+                    <tr>
+                    <td><button class="button buttonVol" type="submit" value="vol55, none" name="button">55%</button></td>
+                    <td><button class="button buttonVol" type="submit" value="vol60, none" name="button">60%</button></td>
+                    <td><button class="button buttonVol" type="submit" value="vol65, none" name="button">65%</button></td>
+                    </tr>
+                    <tr>
+                    <td><button class="button buttonVol" type="submit" value="vol70, none" name="button">70%</button></td>
+                    <td><button class="button buttonVol" type="submit" value="vol75, none" name="button">75%</button></td>
+                    <td><button class="button buttonVol" type="submit" value="vol80, none" name="button">80%</button></td>
+                    </tr>
+                    <tr>
+                    <td><button class="button buttonVol" type="submit" value="vol85, none" name="button">85%</button></td>
+                    <td><button class="button buttonVol" type="submit" value="vol90, none" name="button">90%</button></td>
+                    <td><button class="button buttonVol" type="submit" value="vol100, none" name="button">100%</button></td>
+                    </tr>
+                                   
                     </table>
-                    <br><br><br><br>
-                    <td><button class="button buttonGo" type="submit" value="Back, none" name="button">Back</button></td>
-                
+                    
+                    <br><br><br><br><br>
+                    <<button class="button buttonBack" type="submit" value="Back, none" name="button">Back</button>
+
                   </form>
                 </center>
                 </body>
@@ -330,6 +359,75 @@ class MyServer(BaseHTTPRequestHandler):
                 if (new_volume < 0):
                     new_volume = 0 #Floor to min level acceptaed by system
                 x.set_volume(controller_ID(current_zone), zone_ID(current_zone), new_volume)
+            self._redirect('/go')  # Redirect back same page
+
+        # addiding individual volume step functions since the above volume incerement/decrement is not reliable due to RNET response delay/garbage
+        if payload_cmd == "vol10":
+            x.set_volume(controller_ID(current_zone), zone_ID(current_zone), 10)
+            self._redirect('/go')  # Redirect back same page
+
+        if payload_cmd == "vol20":
+            x.set_volume(controller_ID(current_zone), zone_ID(current_zone), 20)
+            self._redirect('/go')  # Redirect back same page
+
+        if payload_cmd == "vol25":
+            x.set_volume(controller_ID(current_zone), zone_ID(current_zone), 25)
+            self._redirect('/go')  # Redirect back same page
+
+        if payload_cmd == "vol30":
+            x.set_volume(controller_ID(current_zone), zone_ID(current_zone), 30)
+            self._redirect('/go')  # Redirect back same page
+
+        if payload_cmd == "vol35":
+            x.set_volume(controller_ID(current_zone), zone_ID(current_zone), 35)
+            self._redirect('/go')  # Redirect back same page
+
+        if payload_cmd == "vol40":
+            x.set_volume(controller_ID(current_zone), zone_ID(current_zone), 40)
+            self._redirect('/go')  # Redirect back same page
+
+        if payload_cmd == "vol45":
+            x.set_volume(controller_ID(current_zone), zone_ID(current_zone), 45)
+            self._redirect('/go')  # Redirect back same page
+
+        if payload_cmd == "vol50":
+            x.set_volume(controller_ID(current_zone), zone_ID(current_zone), 50)
+            self._redirect('/go')  # Redirect back same page
+
+        if payload_cmd == "vol55":
+            x.set_volume(controller_ID(current_zone), zone_ID(current_zone), 55)
+            self._redirect('/go')  # Redirect back same page
+
+        if payload_cmd == "vol60":
+            x.set_volume(controller_ID(current_zone), zone_ID(current_zone), 60)
+            self._redirect('/go')  # Redirect back same page
+
+        if payload_cmd == "vol65":
+            x.set_volume(controller_ID(current_zone), zone_ID(current_zone), 65)
+            self._redirect('/go')  # Redirect back same page
+
+        if payload_cmd == "vol70":
+            x.set_volume(controller_ID(current_zone), zone_ID(current_zone), 70)
+            self._redirect('/go')  # Redirect back same page
+
+        if payload_cmd == "vol75":
+            x.set_volume(controller_ID(current_zone), zone_ID(current_zone), 75)
+            self._redirect('/go')  # Redirect back same page
+
+        if payload_cmd == "vol80":
+            x.set_volume(controller_ID(current_zone), zone_ID(current_zone), 80)
+            self._redirect('/go')  # Redirect back same page
+
+        if payload_cmd == "vol85":
+            x.set_volume(controller_ID(current_zone), zone_ID(current_zone), 85)
+            self._redirect('/go')  # Redirect back same page
+
+        if payload_cmd == "vol90":
+            x.set_volume(controller_ID(current_zone), zone_ID(current_zone), 90)
+            self._redirect('/go')  # Redirect back same page
+
+        if payload_cmd == "vol100":
+            x.set_volume(controller_ID(current_zone), zone_ID(current_zone), 100)
             self._redirect('/go')  # Redirect back same page
 
 
