@@ -7,4 +7,7 @@ Zone/controller/source information is hard-coded in (for now).
 See three attached screenshots for how the interface looks.
 
 Put this in Crontab (sudo crontab -e) to always run on startup:
-@reboot python3 /home/pi/russound_app.py &   
+"@reboot python3 /home/pi/russound_app.py &"
+
+Make sure russound_app.py has execution right:
+"chmod a+x russound_app.py"
