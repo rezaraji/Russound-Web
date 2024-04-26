@@ -8,12 +8,12 @@ See three attached screenshots for how the interface looks.
 
 To make launcher.sh run on reboot:
 
--chmod 755 launcher.sh
--mkdir logs (for output log)
--sudo crontab -e
--Add "@reboot sh /home/pi/launcher.sh >/home/pi/logs/cronlog 2>&1"
+chmod 755 launcher.sh
+mkdir logs (for output log - not needed for real instance as it uses memory)
+sudo crontab -e
+Add "@reboot sh /home/pi/launcher.sh >/home/pi/logs/cronlog 2>&1" (take out the output log for real instance: "@reboot sh /home/pi/launcher.sh &")
 
--sudo reboot (to test)
+sudo reboot (to test)
 
--Make sure russound_app.py has execution right:
+Make sure russound_app.py has execution right:
 "chmod a+x russound_app.py"
