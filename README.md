@@ -6,8 +6,14 @@ Only exposing power, volume and source selection (for now).
 Zone/controller/source information is hard-coded in (for now).
 See three attached screenshots for how the interface looks.
 
-Put this in Crontab (sudo crontab -e) to always run on startup:
-"@reboot python3 /home/pi/russound_app.py &"
+To make launcher.sh run on reboot:
 
-Make sure russound_app.py has execution right:
+-chmod 755 launcher.sh
+-mkdir logs (for output log)
+-sudo crontab -e
+-Add "@reboot sh /home/pi/launcher.sh >/home/pi/logs/cronlog 2>&1"
+
+-sudo reboot (to test)
+
+-Make sure russound_app.py has execution right:
 "chmod a+x russound_app.py"
