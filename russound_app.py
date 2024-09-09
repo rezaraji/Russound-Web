@@ -8,7 +8,7 @@ Uses a converted russound RNET library to work on serial port (russound_serial.p
 import russound_serial
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-host_name = '192.168.1.200'  # Change this to your Raspberry Pi IP address
+host_name = '192.168.1.199'  # Change this to your Raspberry Pi IP address
 host_port = 8000
 
 #RUSSOUND SYSTEM SETTINGS - modify to match your system
@@ -21,11 +21,15 @@ current_cmd = ""
 current_zone = ""
 new_volume = 0
 
-SERIAL_PORT = '/dev/ttyUSB0'       # for RPi
+#use "ls /dev/tty*" command to find the serial port names
+#SERIAL_PORT = '/dev/ttyUSB0'       # for RPi 3 B+
+SERIAL_PORT = '/dev/ttyUSB0'       # for RPi 4
 BAUD = 19200
 
 #Initiate connection to Russound system
 x = russound_serial.Russound(SERIAL_PORT, BAUD)
+
+#print (x)
 
 def all_on():     #All zones ON
     for controller in range(1, CONTROLLER_COUNT+1):
@@ -85,6 +89,7 @@ class MyServer(BaseHTTPRequestHandler):
         if (self.path == '/'):
             html = '''
                 <!DOCTYPE html>
+                
                 <style>
                 .content {
                   max-width: 500px;
@@ -114,6 +119,8 @@ class MyServer(BaseHTTPRequestHandler):
                 .buttonAllOff {width: 80%; background-color: #DC143C;}
                 .buttonGo {width: 100%; background-color: #6593ff;}
                 </style>
+               
+                <link rel="icon" type="image/png" href="/favicon.png">
     
                 <body>
                   <center>
@@ -307,6 +314,8 @@ class MyServer(BaseHTTPRequestHandler):
         payload_cmd = payload.split("%2C+")[0] #"On"
         payload_zone = payload.split("%2C+")[1] #Zone #
         payload_zone = payload_zone.replace("+", " ")   #replace any spaces that were converted to "+" via the HTML Post
+
+        #print (payload_cmd, payload_zone)
 
         if payload_cmd == "Go":     #set the cmd, zone and initial volume for the specific zone page we're in now
             current_cmd = payload_cmd
