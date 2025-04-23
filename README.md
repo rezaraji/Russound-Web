@@ -6,6 +6,9 @@ Only exposing power, volume and source selection (for now).
 Zone/controller/source information is hard-coded in (for now).
 See three attached screenshots for how the interface looks.
 
+Edit dhcpcd.conf to fix the wifi dhcp address on 
+boothp. 
+
 To make launcher.sh run on reboot:
 
 chmod 755 launcher.sh
