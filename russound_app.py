@@ -8,7 +8,7 @@ Uses a converted russound RNET library to work on serial port (russound_serial.p
 import russound_serial
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-host_name = '192.168.1.199'  # Change this to your Raspberry Pi IP address
+host_name = '192.168.1.200'  # Change this to your Raspberry Pi IP address
 host_port = 8000
 
 #RUSSOUND SYSTEM SETTINGS - modify to match your system
