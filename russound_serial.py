@@ -133,28 +133,16 @@ class Russound:
         resp_msg_signature = self.create_response_signature("04 02 00 @zz 07", zone)
         send_msg = self.create_send_message("F0 @cc 00 7F 00 00 @kk 01 04 02 00 @zz 07 00 00", controller, zone)
         try:
-            #self.lock.acquire()
-            #_LOGGER.debug('Acquired lock for zone %s', zone)
             self.send_data(send_msg)
-            #_LOGGER.debug("Zone: %s Sent: %s", zone, send_msg)
-            # Expected response is as per pg 23 of cav6.6_rnet_protocol_v1.01.00.pdf
             matching_message = self.get_response_message(resp_msg_signature)
             if matching_message is not None:
-                # Offset of 11 is the position of return data payload is that we require for the signature we are using.
-                #_LOGGER.debug("matching message to use= %s", matching_message)
-                #_LOGGER.debug("matching message length= %s", len(matching_message))
+                # Offset of 11 is the position of return data payload for the signature we are using.
                 if return_variable == 4:
-                    return_value = [matching_message[11], matching_message[12], matching_message[13]]
-                else:
-                    return_value = matching_message[return_variable + 11]
-            else:
-                return_value = None
-                #_LOGGER.warning("Did not receive expected Russound power state for controller %s and zone %s.", controller, zone)
-        finally:
-            #self.lock.release()
-            #_LOGGER.debug("Released lock for zone %s", zone)
-            #_LOGGER.debug("End - controller= %s, zone= %s, get status \n", controller, zone)
-            return return_value
+                    return [matching_message[11], matching_message[12], matching_message[13]]
+                return matching_message[return_variable + 11]
+            return None
+        except Exception:
+            return None
 
     def get_power(self, controller, zone):
         """ Gets the power status as a 0 or 1 which is located on a 0 byte offset """

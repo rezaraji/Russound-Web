@@ -160,11 +160,10 @@ def api_reconnect():
     try:
         with serial_lock:
             try:
-                russound.disconnect()
+                russound.ser.close()
             except Exception:
                 pass
             russound = russound_serial.Russound(SERIAL_PORT, BAUD)
-            russound.connect()
         return jsonify(ok=True)
     except Exception as e:
         return jsonify(ok=False, error=str(e)), 500
