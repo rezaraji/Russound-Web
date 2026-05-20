@@ -1,0 +1,23 @@
+{
+  "host": "192.168.1.200",
+  "port": 8000,
+  "serial_port": "/dev/ttyUSB0",
+  "baud": 19200,
+  "controller_count": 2,
+  "zone_names": [
+    "Guest Bath",
+    "Dining Room",
+    "Kitchen",
+    "Master Bed",
+    "Master Bath",
+    "Nick",
+    "Office",
+    "Play Room",
+    "Alex",
+    "Living Room",
+    "Patio",
+    "Pool"
+  ],
+  "source_names": ["Sonos", "Apple"],
+  "volume_presets": [25, 50, 75, 100]
+}

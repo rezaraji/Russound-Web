@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>{{ zone }}</title>
+  <link rel="icon" type="image/png" href="/static/favicon.png">
+  <style>
+    :root {
+      --bg:       #f2f2f7;
+      --surface:  #ffffff;
+      --surface2: #f2f2f7;
+      --border:   rgba(0,0,0,0.1);
+      --text:     #000000;
+      --text2:    #6c6c70;
+      --btn-on:   #34c759;
+      --btn-off:  #ff3b30;
+      --accent:   #007aff;
+      --orange:   #ff9500;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:       #000000;
+        --surface:  #1c1c1e;
+        --surface2: #2c2c2e;
+        --border:   rgba(255,255,255,0.1);
+        --text:     #ffffff;
+        --text2:    #8e8e93;
+        --btn-on:   #30d158;
+        --btn-off:  #ff453a;
+        --accent:   #0a84ff;
+        --orange:   #ff9f0a;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header {
+      background: var(--surface);
+      border-bottom: 0.5px solid var(--border);
+      padding: 16px 20px 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-size: 17px;
+      cursor: pointer;
+      padding: 4px 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .back-btn:active { opacity: 0.6; }
+    header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      flex: 1;
+    }
+
+    .content {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .card {
+      background: var(--surface);
+      border-radius: 16px;
+      border: 0.5px solid var(--border);
+      overflow: hidden;
+    }
+    .card-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text2);
+      padding: 12px 16px 6px;
+    }
+    .card-inner {
+      padding: 0 12px 12px;
+    }
+
+    /* Power */
+    .power-row {
+      display: flex;
+      gap: 10px;
+      padding: 0 12px 12px;
+    }
+    .power-btn {
+      flex: 1;
+      border: none;
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .power-btn:active { opacity: 0.7; }
+    .power-on  { background: var(--btn-on);  color: #fff; }
+    .power-off { background: var(--btn-off); color: #fff; }
+    .power-btn.inactive { opacity: 0.25; }
+
+    /* Source */
+    .source-row {
+      display: flex;
+      gap: 8px;
+      padding: 0 12px 12px;
+    }
+    .source-btn {
+      flex: 1;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      background: var(--surface2);
+      color: var(--text2);
+      transition: all 0.15s;
+    }
+    .source-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--surface);
+    }
+    .source-btn:active { opacity: 0.7; }
+
+    /* Volume slider */
+    .vol-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 0 16px 8px;
+    }
+    .vol-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--orange);
+    }
+    .vol-unit {
+      font-size: 16px;
+      color: var(--text2);
+      margin-left: 2px;
+    }
+    .slider-wrap {
+      padding: 0 16px 4px;
+    }
+    input[type=range] {
+      width: 100%;
+      height: 6px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--surface2);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--orange);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      cursor: pointer;
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--orange);
+      border: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      cursor: pointer;
+    }
+
+    /* Volume presets */
+    .preset-row {
+      display: flex;
+      gap: 8px;
+      padding: 10px 12px 12px;
+    }
+    .preset-btn {
+      flex: 1;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 0;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--surface2);
+      color: var(--text2);
+      transition: opacity 0.15s;
+    }
+    .preset-btn:active { opacity: 0.7; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #3a0f0f;
+      color: #ff6961;
+      border: 0.5px solid #ff453a;
+      border-radius: 12px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 100;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="toast" id="toast">⚠ Command failed — try again</div>
+  <form method="post" action="/post" id="zone-form">
+
+    <header>
+      <button class="back-btn" type="submit" name="button" value="Back, none">
+        ‹ Back
+      </button>
+      <div>
+        <h1>{{ zone }}</h1>
+        <div style="font-size:11px; color:var(--text2); margin-top:1px; opacity:0.6;">
+          Controller {{ (zone_index // 6) + 1 }} · Zone {{ (zone_index % 6) + 1 }}
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- Power -->
+      <div class="card">
+        <div class="card-label">Power</div>
+        <div class="power-row">
+          <button class="power-btn power-on"  type="submit" name="button" value="On, zone">On</button>
+          <button class="power-btn power-off" type="submit" name="button" value="Off, zone">Off</button>
+        </div>
+      </div>
+
+      <!-- Source -->
+      <div class="card">
+        <div class="card-label">Source</div>
+        <div class="source-row">
+          {% for source in sources %}
+          <button class="source-btn" type="button" data-source="{{ source }}"
+                  onclick="selectSource('{{ source }}')">{{ source }}</button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Volume -->
+      <div class="card">
+        <div class="card-label">Volume</div>
+        <div class="vol-header">
+          <span style="font-size:15px; color:var(--text2);">Level</span>
+          <span><span class="vol-value" id="vol-display">—</span><span class="vol-unit">%</span></span>
+        </div>
+        <div class="slider-wrap">
+          <input type="range" id="vol-slider" min="0" max="100" step="5" value="50"
+                 oninput="updateVol(this.value)">
+        </div>
+        <div class="preset-row">
+          {% for preset in volume_presets %}
+          <button class="preset-btn" type="button"
+                  onclick="setVolume({{ preset }})">{{ preset }}%</button>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+  </form>
+
+  <script>
+    let toastTimer = null;
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    function sendCmd(value, onError) {
+      fetch('/post', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'button=' + encodeURIComponent(value)
+      })
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); })
+      .catch(() => {
+        showToast('⚠ Command failed — try again');
+        if (onError) onError();
+      });
+    }
+
+    function setPowerState(isOn) {
+      document.querySelector('.power-on').classList.toggle('inactive', !isOn);
+      document.querySelector('.power-off').classList.toggle('inactive', isOn);
+    }
+
+    function setActiveSource(sourceName) {
+      document.querySelectorAll('.source-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.source === sourceName);
+      });
+    }
+
+    function selectSource(sourceName) {
+      // Remember previous source for rollback
+      const prev = document.querySelector('.source-btn.active');
+      const prevName = prev ? prev.dataset.source : null;
+
+      setActiveSource(sourceName); // instant visual feedback
+
+      sendCmd('Source, ' + sourceName, () => {
+        // Rollback to previous source on failure
+        if (prevName) setActiveSource(prevName);
+        else document.querySelectorAll('.source-btn').forEach(b => b.classList.remove('active'));
+      });
+    }
+
+    function updateVol(val) {
+      document.getElementById('vol-display').textContent = val;
+    }
+
+    function setVolume(level) {
+      const slider = document.getElementById('vol-slider');
+      const display = document.getElementById('vol-display');
+      const prevVal = slider.value;
+
+      slider.value = level;
+      display.textContent = level;
+
+      sendCmd('vol' + level + ', none', () => {
+        // Rollback slider on failure
+        slider.value = prevVal;
+        display.textContent = prevVal;
+      });
+    }
+
+    // Slider release
+    document.getElementById('vol-slider').addEventListener('change', function() {
+      const level = this.value;
+      const prevVal = this.dataset.lastGood || level;
+
+      sendCmd('vol' + level + ', none', () => {
+        this.value = prevVal;
+        document.getElementById('vol-display').textContent = prevVal;
+      });
+    });
+
+    // Load current zone status on page open
+    fetch('/api/status/{{ zone_index }}')
+      .then(r => r.json())
+      .then(z => {
+        const slider = document.getElementById('vol-slider');
+        if (z.volume !== null) {
+          slider.value = z.volume;
+          slider.dataset.lastGood = z.volume;
+          document.getElementById('vol-display').textContent = z.volume;
+        } else {
+          document.getElementById('vol-display').textContent = '?';
+        }
+        if (z.power !== null) setPowerState(z.power === 1);
+        if (z.source_name)   setActiveSource(z.source_name);
+      })
+      .catch(() => {
+        document.getElementById('vol-display').textContent = '?';
+      });
+  </script>
+</body>
+</html>

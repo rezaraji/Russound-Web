@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Russound</title>
+  <link rel="icon" type="image/png" href="/static/favicon.png">
+  <style>
+    :root {
+      --bg:        #f2f2f7;
+      --surface:   #ffffff;
+      --surface2:  #f2f2f7;
+      --border:    rgba(0,0,0,0.1);
+      --text:      #000000;
+      --text2:     #6c6c70;
+      --on-bg:     #d1f5e0;
+      --on-text:   #1a7a3e;
+      --off-bg:    #fde8e8;
+      --off-text:  #b91c1c;
+      --btn-on:    #34c759;
+      --btn-off:   #ff3b30;
+      --btn-go:    #007aff;
+      --accent:    #007aff;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:        #000000;
+        --surface:   #1c1c1e;
+        --surface2:  #2c2c2e;
+        --border:    rgba(255,255,255,0.1);
+        --text:      #ffffff;
+        --text2:     #8e8e93;
+        --on-bg:     #0a3d1f;
+        --on-text:   #30d158;
+        --off-bg:    #3a0f0f;
+        --off-text:  #ff6961;
+        --btn-on:    #30d158;
+        --btn-off:   #ff453a;
+        --btn-go:    #0a84ff;
+        --accent:    #0a84ff;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header {
+      background: var(--surface);
+      border-bottom: 0.5px solid var(--border);
+      padding: 16px 20px 12px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+    .header-title { flex: 1; }
+    header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    .header-sub {
+      font-size: 13px;
+      color: var(--text2);
+      margin-top: 2px;
+    }
+    .settings-btn {
+      background: none;
+      border: none;
+      color: var(--text2);
+      font-size: 22px;
+      cursor: pointer;
+      padding: 2px 0 0 8px;
+      line-height: 1;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+    .settings-btn:active { opacity: 0.5; }
+    .health-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--btn-on);
+      flex-shrink: 0;
+      margin-top: 6px;
+      transition: background 0.4s;
+    }
+    .health-dot.warn  { background: var(--orange, #ff9500); }
+    .health-dot.error { background: var(--btn-off); }
+    .global-btns {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+    }
+    .global-btn {
+      flex: 1;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .global-btn:active { opacity: 0.7; }
+    .global-btn-on  { background: var(--btn-on);  color: #fff; }
+    .global-btn-off { background: var(--btn-off); color: #fff; }
+
+    .zone-list {
+      padding: 0 16px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .zone-card {
+      background: var(--surface);
+      border-radius: 16px;
+      border: 0.5px solid var(--border);
+      overflow: hidden;
+    }
+    .zone-main {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+      gap: 12px;
+    }
+    .zone-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--text2);
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+    .zone-indicator.on { background: var(--btn-on); box-shadow: 0 0 6px var(--btn-on); }
+    .zone-info {
+      flex: 1;
+      min-width: 0;
+      cursor: pointer;
+      -webkit-tap-highlight-color: rgba(0,0,0,0.05);
+    }
+    .zone-info:active { opacity: 0.6; }
+    .zone-name {
+      font-size: 17px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .zone-name.marquee {
+      text-overflow: clip;
+      position: relative;
+    }
+    .zone-name.marquee span {
+      display: inline-block;
+      padding-right: 2em;
+      animation: marquee 6s linear infinite;
+    }
+    @keyframes marquee {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .zone-status {
+      font-size: 13px;
+      color: var(--text2);
+      margin-top: 2px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .source-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 1px 7px;
+      border-radius: 20px;
+      background: var(--accent);
+      color: #fff;
+      opacity: 0.85;
+      letter-spacing: 0.01em;
+      flex-shrink: 0;
+    }
+    .zone-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .zone-btn {
+      border: none;
+      border-radius: 10px;
+      padding: 0;
+      width: 52px;
+      height: 44px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .zone-btn:active { opacity: 0.7; }
+    .zone-btn-on  { background: var(--on-bg);  color: var(--on-text); }
+    .zone-btn-off { background: var(--off-bg); color: var(--off-text); }
+    .zone-btn-go  {
+      background: var(--surface2);
+      color: var(--accent);
+      font-size: 22px;
+      width: 44px;
+    }
+    .loading-bar {
+      height: 2px;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.4s ease;
+      position: fixed;
+      top: 0; left: 0;
+      z-index: 100;
+    }
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #3a0f0f;
+      color: #ff6961;
+      border: 0.5px solid #ff453a;
+      border-radius: 12px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 100;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: var(--surface);
+      border-radius: 18px;
+      padding: 20px;
+      width: 100%;
+      max-width: 400px;
+    }
+    .modal h2 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .modal p {
+      font-size: 13px;
+      color: var(--text2);
+      margin-bottom: 16px;
+    }
+    .modal-section-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text2);
+      margin-bottom: 8px;
+    }
+    .modal-source-row, .modal-vol-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .modal-source-btn {
+      flex: 1;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      background: var(--surface2);
+      color: var(--text2);
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .modal-source-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--surface);
+    }
+    .modal-vol-btn {
+      flex: 1;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 0;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--surface2);
+      color: var(--text2);
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .modal-vol-btn.active {
+      border-color: var(--orange, #ff9500);
+      color: var(--orange, #ff9500);
+      background: var(--surface);
+    }
+    .modal-actions { display: flex; gap: 10px; }
+    .modal-cancel {
+      flex: 1;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--surface2);
+      color: var(--text);
+      font-family: inherit;
+    }
+    .modal-go {
+      flex: 2;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--btn-on);
+      color: #fff;
+      font-family: inherit;
+    }
+    .modal-cancel:active, .modal-go:active { opacity: 0.7; }
+  </style>
+</head>
+<body>
+  <div class="loading-bar" id="loading-bar"></div>
+  <div class="toast" id="toast">⚠ Command failed — try again</div>
+
+  <header>
+    <div class="header-title">
+      <h1>Russound</h1>
+      <div class="header-sub" id="status-label">Loading zone status…</div>
+    </div>
+    <div style="display:flex; align-items:flex-start; gap:10px;">
+      <div class="health-dot" id="health-dot" title="Serial connection"></div>
+      <a class="settings-btn" href="/admin" title="Admin">⚙</a>
+    </div>
+  </header>
+
+  <!-- All On modal -->
+  <div class="modal-overlay" id="all-on-modal">
+    <div class="modal">
+      <h2>All On</h2>
+      <p>Choose a source and volume for all zones.</p>
+      <div class="modal-section-label">Source</div>
+      <div class="modal-source-row">
+        {% for source in sources %}
+        <button class="modal-source-btn" data-source="{{ source }}"
+                onclick="selectModalSource('{{ source }}')">{{ source }}</button>
+        {% endfor %}
+      </div>
+      <div class="modal-section-label">Volume</div>
+      <div class="modal-vol-row">
+        {% for preset in volume_presets %}
+        <button class="modal-vol-btn" data-vol="{{ preset }}"
+                onclick="selectModalVol({{ preset }})">{{ preset }}%</button>
+        {% endfor %}
+      </div>
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+        <button class="modal-go" onclick="modalGo()">Turn On</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Go buttons still use a real form submit to navigate to zone detail -->
+  <form method="post" action="/post" id="go-form">
+    <div class="global-btns">
+      <button class="global-btn global-btn-on"  type="button" onclick="openModal()">All On</button>
+      <button class="global-btn global-btn-off" type="button" onclick="sendCmd('Off, All')">All Off</button>
+    </div>
+
+    <div class="zone-list">
+      {% for zone in zones %}
+      <div class="zone-card">
+        <div class="zone-main">
+          <div class="zone-indicator" id="ind-{{ loop.index0 }}"></div>
+          <div class="zone-info" onclick="goToZone('{{ zone }}')">
+            {% if zone | length > 12 %}
+            <div class="zone-name marquee"><span>{{ zone }}&nbsp;&nbsp;·&nbsp;&nbsp;{{ zone }}&nbsp;&nbsp;·&nbsp;&nbsp;</span></div>
+            {% else %}
+            <div class="zone-name">{{ zone }}</div>
+            {% endif %}
+            <div class="zone-status" id="status-{{ loop.index0 }}"></div>
+          </div>
+          <div class="zone-actions">
+            <button class="zone-btn zone-btn-on"  type="button" onclick="sendCmd('On, {{ zone }}')">On</button>
+            <button class="zone-btn zone-btn-off" type="button" onclick="sendCmd('Off, {{ zone }}')">Off</button>
+            <button class="zone-btn zone-btn-go"  type="submit" name="button" value="Go, {{ zone }}">›</button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </form>
+
+  <script>
+    const ZONE_COUNT = {{ zones | length }};
+    const ZONES      = {{ zones | tojson }};
+    const SOURCES    = {{ sources | tojson }};
+    const VOL_PRESETS = {{ volume_presets | tojson }};
+    let onCount = 0;
+    let toastTimer = null;
+    let refreshTimer = null;
+    let isLoading = false;
+    let serialOk = true;       // tracks serial health
+    let serialFailCount = 0;   // consecutive failed status reads
+
+    // ── Navigation ────────────────────────────────────────────────────────────
+
+    function goToZone(zoneName) {
+      const form = document.getElementById('go-form');
+      // Create a temporary hidden input and submit
+      const input = document.createElement('input');
+      input.type  = 'hidden';
+      input.name  = 'button';
+      input.value = 'Go, ' + zoneName;
+      form.appendChild(input);
+      form.submit();
+    }
+
+    // ── Health indicator ──────────────────────────────────────────────────────
+
+    function setHealth(state) {
+      // state: 'ok' | 'warn' | 'error'
+      const dot = document.getElementById('health-dot');
+      dot.classList.remove('warn', 'error');
+      if (state !== 'ok') dot.classList.add(state);
+      serialOk = (state === 'ok');
+    }
+
+    function tryReconnect() {
+      fetch('/api/reconnect', { method: 'POST' })
+        .then(r => r.json())
+        .then(d => {
+          if (d.ok) {
+            setHealth('ok');
+            serialFailCount = 0;
+            showToast('✓ Reconnected');
+            loadAll(true);
+          } else {
+            showToast('⚠ Reconnect failed — ' + (d.error || 'check Pi'));
+          }
+        })
+        .catch(() => showToast('⚠ Reconnect failed'));
+    }
+
+    // ── UI helpers ────────────────────────────────────────────────────────────
+
+    function updateLabel() {
+      const label = document.getElementById('status-label');
+      label.textContent = onCount === 0 ? 'All zones off' :
+        onCount === 1 ? '1 zone on' : onCount + ' zones on';
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    function applyZone(i, z) {
+      const ind = document.getElementById('ind-' + i);
+      const st  = document.getElementById('status-' + i);
+      if (z.power === 1) {
+        if (!ind.classList.contains('on')) { ind.classList.add('on'); onCount++; }
+        st.innerHTML = '<span class="source-badge">' + (z.source_name || '') + '</span>'
+                     + '<span>' + z.volume + '%</span>';
+      } else if (z.power === 0) {
+        if (ind.classList.contains('on')) { ind.classList.remove('on'); onCount = Math.max(0, onCount - 1); }
+        st.innerHTML = 'Off';
+      }
+      updateLabel();
+    }
+
+    // ── Send command ──────────────────────────────────────────────────────────
+
+    function sendCmd(value) {
+      const parts = value.split(', ');
+      const cmd = parts[0], zone = parts[1];
+      const i = ZONES.indexOf(zone);
+
+      // Optimistic update
+      let prevOn = false;
+      if ((cmd === 'On' || cmd === 'Off') && i >= 0) {
+        const ind = document.getElementById('ind-' + i);
+        const st  = document.getElementById('status-' + i);
+        prevOn = ind.classList.contains('on');
+        if (cmd === 'On') { ind.classList.add('on'); st.innerHTML = '…'; onCount++; }
+        else { ind.classList.remove('on'); st.innerHTML = 'Off'; onCount = Math.max(0, onCount - 1); }
+        updateLabel();
+      }
+
+      fetch('/post', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'button=' + encodeURIComponent(value)
+      })
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); })
+      .catch(() => {
+        showToast('⚠ Command failed — try again');
+        if ((cmd === 'On' || cmd === 'Off') && i >= 0) {
+          const ind = document.getElementById('ind-' + i);
+          const st  = document.getElementById('status-' + i);
+          if (prevOn) { ind.classList.add('on'); onCount++; }
+          else { ind.classList.remove('on'); onCount = Math.max(0, onCount - 1); st.textContent = 'Off'; }
+          updateLabel();
+        }
+      });
+    }
+
+    // ── Zone status loading ───────────────────────────────────────────────────
+
+    async function loadAll(quiet) {
+      if (isLoading) return;
+      isLoading = true;
+      if (!quiet) {
+        onCount = 0;
+        document.getElementById('status-label').textContent = 'Loading…';
+      }
+      let nullCount = 0;
+      for (let i = 0; i < ZONE_COUNT; i++) {
+        await fetch('/api/status/' + i)
+          .then(r => r.json())
+          .then(z => {
+            if (quiet && i === 0) onCount = 0;
+            applyZone(i, z);
+            if (z.power === null) nullCount++;
+          })
+          .catch(() => { nullCount++; });
+      }
+      // Update health dot based on how many zones responded
+      if (nullCount === 0) {
+        serialFailCount = 0;
+        setHealth('ok');
+      } else if (nullCount < ZONE_COUNT) {
+        serialFailCount++;
+        setHealth('warn');
+      } else {
+        // All zones failed — serial likely down
+        serialFailCount++;
+        setHealth('error');
+        if (serialFailCount >= 2) {
+          showToast('⚠ Serial connection lost — attempting reconnect…');
+          tryReconnect();
+          isLoading = false;
+          return;
+        }
+      }
+      isLoading = false;
+      scheduleRefresh();
+    }
+
+    function scheduleRefresh() {
+      clearTimeout(refreshTimer);
+      refreshTimer = setTimeout(() => loadAll(true), 30000);
+    }
+
+    // Initial load
+    loadAll(false);
+
+    // ── Modal (All On) ────────────────────────────────────────────────────────
+
+    let modalSource = SOURCES[0] || '';
+    let modalVol    = VOL_PRESETS[0] || 50;
+
+    function openModal() {
+      modalSource = SOURCES[0] || '';
+      modalVol    = VOL_PRESETS[0] || 50;
+      document.querySelectorAll('.modal-source-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.source === modalSource));
+      document.querySelectorAll('.modal-vol-btn').forEach(b =>
+        b.classList.toggle('active', parseInt(b.dataset.vol) === modalVol));
+      document.getElementById('all-on-modal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('all-on-modal').classList.remove('show');
+    }
+
+    function selectModalSource(src) {
+      modalSource = src;
+      document.querySelectorAll('.modal-source-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.source === src));
+    }
+
+    function selectModalVol(vol) {
+      modalVol = vol;
+      document.querySelectorAll('.modal-vol-btn').forEach(b =>
+        b.classList.toggle('active', parseInt(b.dataset.vol) === vol));
+    }
+
+    function modalGo() {
+      closeModal();
+      sendCmd('On, All');
+      setTimeout(() => {
+        fetch('/api/party', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ source: modalSource, volume: modalVol })
+        })
+        .then(r => { if (!r.ok) throw new Error(); })
+        .catch(() => showToast('⚠ Could not set source/volume'));
+      }, 800);
+    }
+
+    // Close modal on backdrop tap
+    document.getElementById('all-on-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+  </script>
+</body>
+</html>
