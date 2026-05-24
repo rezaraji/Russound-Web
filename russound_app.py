@@ -218,38 +218,9 @@ def zone_detail():
     )
 
 
-@app.route('/api/status')
-def api_status():
-    """Return status for all zones at once."""
-    zones = []
-    with serial_lock:
-        for zone_name in ZONE_NAMES:
-            ctrl = controller_id(zone_name)
-            zn = zone_id(zone_name)
-            try:
-                info = russound.get_zone_info(ctrl, zn, 4)
-                if info is not None:
-                    power = info[0]
-                    src = info[1]
-                    volume = info[2] * 2
-                    src_name = SOURCE_NAMES[src] if src < len(SOURCE_NAMES) else f'Source {src+1}'
-                    zones.append({
-                        'name': zone_name,
-                        'power': power,
-                        'source': src,
-                        'source_name': src_name,
-                        'volume': volume,
-                    })
-                else:
-                    zones.append({'name': zone_name, 'power': None, 'source': None, 'source_name': None, 'volume': None})
-            except Exception:
-                zones.append({'name': zone_name, 'power': None, 'source': None, 'source_name': None, 'volume': None})
-    return jsonify(zones=zones)
-
-
 @app.route('/api/status/<int:zone_index>')
 def api_status_zone(zone_index):
-    """Return status for a single zone by index (0-based). Fast — one serial read."""
+    """Return status for a single zone by index (0-based)."""
     if zone_index < 0 or zone_index >= len(ZONE_NAMES):
         return jsonify(error='invalid zone'), 400
     zone_name = ZONE_NAMES[zone_index]

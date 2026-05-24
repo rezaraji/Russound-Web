@@ -36,7 +36,7 @@ class Russound:
     def __init__(self, port, baud):
         """ Initialise Russound class """
 
-        self.ser = serial.Serial(port=port, baudrate=baud, timeout=1)
+        self.ser = serial.Serial(port=port, baudrate=baud, timeout=0.1)
 
         self._last_send = time.time()  # Use this to keep track of when the last send command was sent
         self.lock = threading.Lock()   # Used to ensure only one thread sends commands to the Russound
@@ -220,7 +220,8 @@ class Russound:
         if resp_msg_signature is None:
             no_of_socket_reads = 1  # If we are not looking for a specific response do a single read to clear the buffer
         else:
-            no_of_socket_reads = 20 # Try 20x (= approx 2s at default)if we are looking for a specific response
+            no_of_socket_reads = 8  # 8 × 30ms = ~240ms max wait (was 20 × 100ms = 2s)
+        read_delay = 0.03       # 30ms between reads (was 100ms)
 
         time.sleep(delay)  # Insert recommended delay to ensure command is processed correctly
 
@@ -231,7 +232,7 @@ class Russound:
                 matching_message, data = self.find_signature(data, resp_msg_signature)
             if matching_message is not None:  # Required response found
                 break
-            time.sleep(delay)  # Wait before reading again - default of 100ms
+            time.sleep(read_delay)  # Wait before reading again
 
         return matching_message
 
