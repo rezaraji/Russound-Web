@@ -191,26 +191,36 @@
       gap: 8px;
       flex-shrink: 0;
     }
-    .zone-btn {
+    .zone-btn-go  {
       border: none;
       border-radius: 10px;
       padding: 0;
-      width: 52px;
+      width: 44px;
+      height: 44px;
+      font-size: 22px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      background: var(--surface2);
+      color: var(--accent);
+    }
+    .zone-btn-go:active { opacity: 0.7; }
+
+    /* Per-zone On/Off buttons */
+    .zone-btn-on, .zone-btn-off {
+      border: none;
+      border-radius: 10px;
+      padding: 0;
+      width: 44px;
       height: 44px;
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
       transition: opacity 0.15s;
     }
-    .zone-btn:active { opacity: 0.7; }
     .zone-btn-on  { background: var(--on-bg);  color: var(--on-text); }
     .zone-btn-off { background: var(--off-bg); color: var(--off-text); }
-    .zone-btn-go  {
-      background: var(--surface2);
-      color: var(--accent);
-      font-size: 22px;
-      width: 44px;
-    }
+    .zone-btn-on:active, .zone-btn-off:active { opacity: 0.7; }
     .loading-bar {
       height: 2px;
       background: var(--accent);
@@ -410,9 +420,9 @@
             <div class="zone-status" id="status-{{ loop.index0 }}"></div>
           </div>
           <div class="zone-actions">
-            <button class="zone-btn zone-btn-on"  type="button" onclick="sendCmd('On, {{ zone }}')">On</button>
-            <button class="zone-btn zone-btn-off" type="button" onclick="sendCmd('Off, {{ zone }}')">Off</button>
-            <button class="zone-btn zone-btn-go"  type="submit" name="button" value="Go, {{ zone }}">›</button>
+            <button class="zone-btn-on"  type="button" onclick="sendZoneCmd('On',  '{{ zone }}', {{ loop.index0 }})">On</button>
+            <button class="zone-btn-off" type="button" onclick="sendZoneCmd('Off', '{{ zone }}', {{ loop.index0 }})">Off</button>
+            <button class="zone-btn-go"  type="submit" name="button" value="Go, {{ zone }}">›</button>
           </div>
         </div>
       </div>
@@ -429,8 +439,8 @@
     let toastTimer = null;
     let refreshTimer = null;
     let isLoading = false;
-    let serialOk = true;       // tracks serial health
-    let serialFailCount = 0;   // consecutive failed status reads
+    let serialOk = true;
+    let serialFailCount = 0;
 
     // ── Navigation ────────────────────────────────────────────────────────────
 
@@ -487,6 +497,28 @@
       toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
     }
 
+    function sendZoneCmd(cmd, zoneName, i) {
+      const ind = document.getElementById('ind-' + i);
+      const st  = document.getElementById('status-' + i);
+      const wasOn = ind.classList.contains('on');
+      // Optimistic update
+      if (cmd === 'On') { ind.classList.add('on'); st.innerHTML = '…'; onCount++; }
+      else { ind.classList.remove('on'); st.innerHTML = 'Off'; onCount = Math.max(0, onCount - 1); }
+      updateLabel();
+      fetch('/post', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'button=' + encodeURIComponent(cmd + ', ' + zoneName)
+      })
+      .then(r => { if (!r.ok) throw new Error(); })
+      .catch(() => {
+        showToast('⚠ Command failed — try again');
+        if (wasOn) { ind.classList.add('on'); onCount++; }
+        else { ind.classList.remove('on'); onCount = Math.max(0, onCount - 1); st.textContent = 'Off'; }
+        updateLabel();
+      });
+    }
+
     function applyZone(i, z) {
       const ind = document.getElementById('ind-' + i);
       const st  = document.getElementById('status-' + i);
@@ -504,37 +536,13 @@
     // ── Send command ──────────────────────────────────────────────────────────
 
     function sendCmd(value) {
-      const parts = value.split(', ');
-      const cmd = parts[0], zone = parts[1];
-      const i = ZONES.indexOf(zone);
-
-      // Optimistic update
-      let prevOn = false;
-      if ((cmd === 'On' || cmd === 'Off') && i >= 0) {
-        const ind = document.getElementById('ind-' + i);
-        const st  = document.getElementById('status-' + i);
-        prevOn = ind.classList.contains('on');
-        if (cmd === 'On') { ind.classList.add('on'); st.innerHTML = '…'; onCount++; }
-        else { ind.classList.remove('on'); st.innerHTML = 'Off'; onCount = Math.max(0, onCount - 1); }
-        updateLabel();
-      }
-
       fetch('/post', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: 'button=' + encodeURIComponent(value)
       })
       .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); })
-      .catch(() => {
-        showToast('⚠ Command failed — try again');
-        if ((cmd === 'On' || cmd === 'Off') && i >= 0) {
-          const ind = document.getElementById('ind-' + i);
-          const st  = document.getElementById('status-' + i);
-          if (prevOn) { ind.classList.add('on'); onCount++; }
-          else { ind.classList.remove('on'); onCount = Math.max(0, onCount - 1); st.textContent = 'Off'; }
-          updateLabel();
-        }
-      });
+      .catch(() => showToast('⚠ Command failed — try again'));
     }
 
     // ── Zone status loading ───────────────────────────────────────────────────
@@ -557,7 +565,6 @@
           })
           .catch(() => { nullCount++; });
       }
-      // Update health dot based on how many zones responded
       if (nullCount === 0) {
         serialFailCount = 0;
         setHealth('ok');
@@ -565,7 +572,6 @@
         serialFailCount++;
         setHealth('warn');
       } else {
-        // All zones failed — serial likely down
         serialFailCount++;
         setHealth('error');
         if (serialFailCount >= 2) {
@@ -581,7 +587,7 @@
 
     function scheduleRefresh() {
       clearTimeout(refreshTimer);
-      refreshTimer = setTimeout(() => loadAll(true), 30000);
+      refreshTimer = setTimeout(() => loadAll(true), 5000);
     }
 
     // Initial load

@@ -94,26 +94,50 @@
       padding: 0 12px 12px;
     }
 
-    /* Power */
+    /* Power toggle */
     .power-row {
-      display: flex;
-      gap: 10px;
-      padding: 0 12px 12px;
+      padding: 4px 12px 16px;
     }
-    .power-btn {
+    .power-toggle {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: var(--surface2);
+      border-radius: 14px;
+      padding: 4px;
+      cursor: pointer;
+      height: 52px;
+      user-select: none;
+    }
+    .power-toggle-thumb {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: calc(50% - 4px);
+      height: calc(100% - 8px);
+      border-radius: 10px;
+      background: var(--btn-on);
+      transition: left 0.25s cubic-bezier(.4,0,.2,1), background 0.25s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .power-toggle.off .power-toggle-thumb {
+      left: calc(50%);
+      background: var(--btn-off);
+    }
+    .power-toggle-label {
+      position: relative;
       flex: 1;
-      border: none;
-      border-radius: 12px;
-      padding: 16px;
+      text-align: center;
       font-size: 17px;
       font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.15s;
+      color: var(--text2);
+      z-index: 1;
+      transition: color 0.25s;
     }
-    .power-btn:active { opacity: 0.7; }
-    .power-on  { background: var(--btn-on);  color: #fff; }
-    .power-off { background: var(--btn-off); color: #fff; }
-    .power-btn.inactive { opacity: 0.25; }
+    .power-toggle.on  .power-toggle-label.on-label,
+    .power-toggle.off .power-toggle-label.off-label {
+      color: #fff;
+    }
 
     /* Source */
     .source-row {
@@ -257,8 +281,11 @@
       <div class="card">
         <div class="card-label">Power</div>
         <div class="power-row">
-          <button class="power-btn power-on"  type="submit" name="button" value="On, zone">On</button>
-          <button class="power-btn power-off" type="submit" name="button" value="Off, zone">Off</button>
+          <div class="power-toggle" id="power-toggle" onclick="togglePower()">
+            <div class="power-toggle-thumb" id="power-thumb"></div>
+            <span class="power-toggle-label on-label">On</span>
+            <span class="power-toggle-label off-label">Off</span>
+          </div>
         </div>
       </div>
 
@@ -319,9 +346,23 @@
       });
     }
 
+    let powerState = null;
+
     function setPowerState(isOn) {
-      document.querySelector('.power-on').classList.toggle('inactive', !isOn);
-      document.querySelector('.power-off').classList.toggle('inactive', isOn);
+      powerState = isOn;
+      const toggle = document.getElementById('power-toggle');
+      toggle.classList.toggle('on', isOn);
+      toggle.classList.toggle('off', !isOn);
+    }
+
+    function togglePower() {
+      const newState = !(powerState === true);
+      const prev = powerState;
+      setPowerState(newState);
+      sendCmd(newState ? 'On, zone' : 'Off, zone', () => {
+        // rollback on failure
+        setPowerState(prev);
+      });
     }
 
     function setActiveSource(sourceName) {
